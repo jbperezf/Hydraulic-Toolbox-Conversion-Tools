@@ -1,0 +1,22 @@
+Instructions to use the HydraulicToolbox Utilities.
+-----------------------------------------------------------
+
+1. Copy the file "Hydraulic Toolbox Utilities.bat" and the "Scripts" folder to your porject's ditches folder.
+
+2. Create the ditches input file and name it "input.csv"
+
+3. Double click on the "Hydraulic Toolbox Utilities.bat" file and a termianl winwod will open with some options.
+
+4. Select option 1 to create a new Hydraulic Toolbox file with your ditches data.
+
+5. Open the Hydraulic Toolbox file created.
+
+6. Create the Word report and save it in the ditches folder with exactly the name "report.docx"
+
+7. Go back to the terminal and select option 2 to extract the ditches calcs to a .csv file.
+
+9. Design the Channel Linings on Hydraulic Toolbox and repeat steps 6 and 7.
+
+8. Close the terminal or select option 3 to exit.
+
+
