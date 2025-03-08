@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Hydraulic Toolbox HYD Generator</title>
+    <style>
+        body { font-family: Arial; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; }
+        button { padding: 10px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Hydraulic Toolbox HYD Generator</h1>
+    <div class="form-group">
+        <label for="projectName">Project Name:</label>
+        <input type="text" id="projectName" required>
+    </div>
+    <div class="form-group">
+        <label for="csvFile">CSV File:</label>
+        <input type="file" id="csvFile" accept=".csv" required>
+    </div>
+    <button id="generateButton">Generate HYD File</button>
+
+    <script>
+        document.getElementById('generateButton').addEventListener('click', function() {
+            const projectName = document.getElementById('projectName').value || "Hydraulic Toolbox";
+            const csvFile = document.getElementById('csvFile').files[0];
+            
+            if (!csvFile) {
+                alert("Please select a CSV file");
+                return;
+            }
+            
+            // Read the CSV file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Parse CSV
+                const csvData = parseCSV(e.target.result);
+                
+                // Generate HYD content
+                const hydContent = generateHydContent(projectName, csvData);
+                
+                // Create download
+                const blob = new Blob([hydContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${projectName} - Ditches.hyd`;
+                document.body.appendChild(a);
+                a.click();
+                URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            };
+            reader.readAsText(csvFile);
+        });
+        
+        function parseCSV(text) {
+            // Simple CSV parser - you might want to use a library like PapaParse for robust parsing
+            const lines = text.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim());
+            const records = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                
+                const values = lines[i].split(',').map(v => v.trim());
+                const record = {};
+                
+                headers.forEach((header, index) => {
+                    record[header] = values[index] || '';
+                });
+                
+                records.push(record);
+            }
+            
+            return records;
+        }
+        
+        function generateHydContent(projectName, records) {
+            let content = `HYDRAULICTOOLBOXPROJECT53
+
+UNITS                0
+NUMCALCS             0
+TITLE                "${projectName} - Ditches"
+DESIGNER             ""
+DATE                 ${new Date().toLocaleDateString()}
+NOTES                "This file was generated on ${new Date().toLocaleDateString()} using 'HydraulicToolbox Utilities' Script owned by Jose Perez. Contact jbperezf@gmail.com for support."
+`;
+
+            // Add channel blocks
+            content += "CHANNELCALCBLOCK\n";
+            records.forEach(record => {
+                const channelType = record.WIDTH === '0' ? 2 : 0;
+                const channelGuid = generateGuid();
+                
+                content += `CHANNELCALC
+CHANNELNAME          "${record.CHANNELNAME}"
+CHANNELNOTES         "${record.CHANNELNOTES || ''}"
+LATITUDE             0.000000
+LONGITUDE            0.000000
+CHANNELTYPE          ${channelType}
+ZSCALE               0
+CALCTYPE             1
+FLOW                 ${record.FLOW}   
+SIDESLOPE1           ${record.SIDESLOPE1}
+SIDESLOPE2           ${record.SIDESLOPE2}
+WIDTH                ${record.WIDTH}
+DEPTH                0.000000
+LONGSLOPE            ${record.LONGSLOPE}
+MANNINGS             ${record.MANNINGS}
+PIPEDIAMETER         0.000000
+HYDRADIUS            0.000000
+PERMSHEARSTRESS      1.500000
+CALCMAXSHEARSTRESS   0.000000
+CALCAVGSHEARSTRESS   0.000000
+AREAOFFLOW           0.000000
+AVEVELOCITY          0.000000
+WETTEDPERIMETER      0.000000
+TOPWIDTH             0.000000
+FROUDE               0.000000
+CRITICALDEPTH        0.000000
+CRITICALTOPWIDTH     0.000000
+CRITICALVELOCITY     0.000000
+CRITICALSLOPE        0.000000
+STABILITYFACTOR      0.000000
+RISE                 0.000000
+SPAN                 0.000000
+CROSSSECTIONREADONLY 0
+CROSSECTIONDATA      3
+STATION    0.000000 STATIONELEV 0.000000 STATIONMANNINGS 0.000000
+STATION    0.000000 STATIONELEV 0.000000 STATIONMANNINGS 0.000000
+STATION    0.000000 STATIONELEV 0.000000 STATIONMANNINGS 0.000000
+ENDCROSSECTIONDATA
+CHANNELGUID          ${channelGuid}
+ENDCHANNELCALC
+
+`;
+            });
+            content += "ENDCHANNELCALCBLOCK\n";
+            
+            // Could add lining blocks here as well
+            
+            content += "ENDOFFILE";
+            return content;
+        }
+        
+        function generateGuid() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+    </script>
+</body>
+</html>
